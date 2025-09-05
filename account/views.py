@@ -77,5 +77,9 @@ def join_or_create_team(request):
             return redirect("home")
 
 
+@require_GET
 def exit_team(request):
-    pass
+    if request.user.team:
+        request.user.team = None
+        request.user.save()
+    return redirect("home")
