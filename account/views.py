@@ -3,7 +3,8 @@ from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
 from django.contrib.auth import login, authenticate, logout
 
-from account.forms import RegisterForm, LoginForm
+from account.forms import RegisterForm, LoginForm, TeamForm
+from account.models import Team
 
 
 @require_GET
@@ -58,8 +59,22 @@ def logout_account(request):
 
 
 @login_required
-def joinoradd_team(request):
-    pass
+def join_or_create_team(request):
+    if request.method == "GET":
+        if request.user.team:
+            return redirect("home")
+        form = TeamForm()
+        return render(request, "team.html", {"form": form})
+    if request.method == "POST":
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            team_name = form.cleaned_data["name"]
+            team, created = Team.objects.get_or_create(name=team_name)
+            request.user.team = team
+            request.user.save()
+            return redirect("home")
+        else:
+            return redirect("home")
 
 
 def exit_team(request):
