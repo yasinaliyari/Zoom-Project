@@ -2,16 +2,15 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
 from django.contrib.auth import login, authenticate, logout
-
 from account.forms import RegisterForm, LoginForm, TeamForm
-from account.models import Team
+from account.models import Team, UserProfile
 
 
 @require_GET
 def home(request):
     if request.user.is_authenticated:
-        if request.user.team:
-            team_name = request.user.team.name
+        if request.user.userprofile.team:
+            team_name = request.user.userprofile.team.name
         else:
             team_name = "None"
     else:
@@ -25,6 +24,7 @@ def signup(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
+            UserProfile.objects.create(user=user)
             login(request, user)
             return redirect("team")
         else:
@@ -61,7 +61,7 @@ def logout_account(request):
 @login_required
 def join_or_create_team(request):
     if request.method == "GET":
-        if request.user.team:
+        if request.user.userprofile.team:
             return redirect("home")
         form = TeamForm()
         return render(request, "team.html", {"form": form})
@@ -70,16 +70,19 @@ def join_or_create_team(request):
         if form.is_valid():
             team_name = form.cleaned_data["name"]
             team, created = Team.objects.get_or_create(name=team_name)
-            request.user.team = team
-            request.user.save()
+            profile = request.user.userprofile
+            profile.team = team
+            profile.save()
             return redirect("home")
         else:
             return redirect("home")
 
 
 @require_GET
+@login_required
 def exit_team(request):
-    if request.user.team:
-        request.user.team = None
-        request.user.save()
+    if request.user.userprofile.team:
+        profile = request.user.userprofile
+        profile.team = None
+        profile.save()
     return redirect("home")
