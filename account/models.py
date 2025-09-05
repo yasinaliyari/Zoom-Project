@@ -7,5 +7,6 @@ class Team(models.Model):
     zoom_url = models.CharField(max_length=100)
 
 
-class Account(User):
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, null=True, on_delete=models.CASCADE)
