@@ -2,7 +2,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
 from django.contrib.auth import login, authenticate
-
 from account.forms import RegisterForm, LoginForm
 
 
@@ -20,7 +19,17 @@ def home(request):
 
 
 def signup(request):
-    pass
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("team")
+        else:
+            return render(request, "signup.html", {"form": form})
+    else:
+        form = RegisterForm()
+        return render(request, "signup.html", {"form": form})
 
 
 def login_account(request):
