@@ -1,7 +1,8 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.views.decorators.http import require_GET
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
+
 from account.forms import RegisterForm, LoginForm
 
 
@@ -50,8 +51,10 @@ def login_account(request):
     return render(request, "login.html", {"form": form})
 
 
+@require_GET
 def logout_account(request):
-    pass
+    logout(request)
+    return redirect("login")
 
 
 @login_required
