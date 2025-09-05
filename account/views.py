@@ -1,8 +1,22 @@
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_GET
+from django.contrib.auth import login, authenticate
+
+from account.forms import RegisterForm, LoginForm
 
 
+@require_GET
 def home(request):
-    pass
+    if request.user.is_authenticated:
+        if request.user.team:
+            team_name = request.user.team.name
+        else:
+            team_name = "None"
+    else:
+        team_name = "None"
+
+    return render(request, "home.html", {"team": team_name})
 
 
 def signup(request):
